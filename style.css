@@ -295,3 +295,9 @@ svg { display: block; }
 .switch input:checked + .knob::before { transform: translateX(28px); }
 .login-btn { width: 100%; text-align: center; padding: 20px; border-radius: 16px; font-size: 21px; margin-top: 4px; }
 .err.center { text-align: center; }
+
+/* ---------- Presente / Schermata iniziale ---------- */
+.strip.green { background: #2e9e4f; }
+#splash { position: fixed; inset: 0; background: var(--navy); display: grid; place-items: center; z-index: 9999; transition: opacity .45s ease; padding: 40px; }
+#splash.hide { opacity: 0; pointer-events: none; }
+#splash svg { width: min(64%, 300px); height: auto; }

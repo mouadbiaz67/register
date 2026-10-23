@@ -297,8 +297,14 @@ PAGES.home = () => {
   const votiG = DB.voti.filter(v => v.data === giorno);
   let fascia;
   if (fest) fascia = `<div class="strip red">Giornata Festiva</div>`;
-  else if (!arg.length && !votiG.length) fascia = `<div class="strip yellow">Nessuna informazione disponibile per oggi</div>`;
-  else fascia = '';
+  else {
+    const assente = DB.assenze.some(a => a.tipo === 'assenza' && a.data === giorno);
+    const oggiStesso = giorno === iso(oggi());
+    const primaDelle8 = oggiStesso && new Date().getHours() < 8;   // la mattina presto non risulta ancora presente
+    if (assente) fascia = `<div class="strip red">${esc(st.nome)} oggi è assente</div>`;
+    else if (primaDelle8) fascia = `<div class="strip yellow">Nessuna informazione disponibile per oggi</div>`;
+    else fascia = `<div class="strip green">${esc(st.nome)} oggi è presente</div>`;
+  }
   const comp = prossimiCompiti().slice(0, 3);
 
   return `<header class="topbar home">
@@ -800,6 +806,8 @@ initCloud();
 S.logged = leggi(SESS) === '1';
 S.loginUser = leggi(SESS_U) || '';
 mostra();
+const _splash = document.getElementById('splash');
+if (_splash) setTimeout(() => { _splash.classList.add('hide'); setTimeout(() => _splash.remove(), 600); }, 1700);
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.__NO_SW__) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* funziona anche senza */ });
 }
