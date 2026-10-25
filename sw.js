@@ -1,5 +1,5 @@
 // Service worker: salva i file dell'app così funziona anche senza internet
-const CACHE = 'registro-v3';
+const CACHE = 'registro-v4';
 const FILES = ['./', './index.html', './style.css', './app.js', './firebase-config.js', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

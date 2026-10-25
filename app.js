@@ -227,10 +227,19 @@ function datiEsempio() {
     annotazioni: []
   };
 }
+const DATA_VERSION = 2;   // alzando questo numero, i dati aggiornati si caricano da soli al prossimo avvio
 function carica() {
-  try { const s = localStorage.getItem(KEY); if (s) DB = JSON.parse(s); } catch (e) { /* nessun salvataggio disponibile */ }
-  if (!DB) DB = datiEsempio();
-  if (!DB.account) DB.account = { utente: 'Mouad.Biaz', password: '10082008', istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' };
+  let saved = null;
+  try { const s = localStorage.getItem(KEY); if (s) saved = JSON.parse(s); } catch (e) { /* nessun salvataggio disponibile */ }
+  const ver = Number(leggi('registro_datav') || 0);
+  if (!saved || ver < DATA_VERSION) {        // primo avvio, oppure nuovi dati da caricare: li metto da solo
+    DB = datiEsempio();
+    scrivi('registro_datav', String(DATA_VERSION));
+    salva();
+    return;
+  }
+  DB = saved;
+  if (!DB.account) DB.account = { utente: '107447', password: 'fda3db968e7ae', istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' };
   salva();
 }
 const SESS = 'registro_sessione_v1', SESS_U = 'registro_utente_v1';
