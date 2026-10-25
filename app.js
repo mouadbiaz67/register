@@ -91,7 +91,12 @@ function datiEsempio() {
   return {
     studente: { nome: 'MOUAD', cognome: 'BIAZ', classe: '5AIN', anno: `${annoInizio()}/${annoInizio() + 1}` },
     account: { utente: '107447', password: 'fda3db968e7ae', istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' },
-    voti: [],
+    voti: [
+      { id: uid(), materia: "INFORMATICA", voto: 9.75, data: "2026-10-23", tipo: "Scritto", desc: "Sistemi informativi aziendali e nascita del database" },
+      { id: uid(), materia: "SCIENZE MOTORIE E SPORTIVE", voto: 8.25, data: "2026-10-16", tipo: "Pratico", desc: "resistenza-forza e coordinazione" },
+      { id: uid(), materia: "INFORMATICA", voto: 10, data: "2026-10-09", tipo: "Scritto", desc: "tecn web lez 2" },
+      { id: uid(), materia: "INFORMATICA", voto: 9, data: "2026-10-03", tipo: "Scritto", desc: "Verifica scritta lab tecn web modulo 1" }
+    ],
     argomenti: [
       { id: uid(), materia: "SIS. E RETI", data: "2026-09-10", testo: "Laboratorio - ip calculator" },
       { id: uid(), materia: "STORIA", data: "2026-09-10", testo: "Presentazione programma" },
@@ -207,7 +212,19 @@ function datiEsempio() {
       { id: uid(), materia: "INGLESE", data: "2026-10-24", testo: "interrogazione" }
     ],
     compiti: [
-      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-23", testo: "XML - Esercitazioni su Classroom (da consegnare)" }
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-30", testo: "Vogliamo realizzare il classico giochino per bambini delle capitali: il sistema determina una nazione a caso e propone 5 capitali, il bambino deve indovinare quella giusta. Alla fine il software mostra al bambino la risposta corretta, nonché la lingua, la bandiera e il continente di appartenenza. Supponendo che il diagramma ER sia composto dalle relazioni che seguono, disegnare lo schema concettuale, determinare gli attributi e le partecipazioni, realizzare il documento tecnico di accompagnamento per quanto necessario. Stabilire inoltre 2 istanze di \"continenti\", 5 istanze di \"nazioni\" con le proprie \"capitali\", 3 istanze di \"lingue\" e disegnare insiemisticamente i collegamenti tra le istanze. Nazioni-sono in-Continenti; Nazioni-hanno-Capitali; Nazioni-hanno-Lingue. Poiché l'obiettivo è quello di realizzare un gioco per bambini non è necessario tenere in considerazione casi estremi: assumiamo dunque che ogni nazione abbia una sola capitale e si trovi in un solo continente." },
+      { id: uid(), materia: "INGLESE", data: "2026-10-21", testo: "Get ready for the oral test" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-17", testo: "Esercizio della suora" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-17", testo: "Prepararsi alla verifica sui contenuti di questa lezione: https://www.youtube.com/watch?v=zPa_SIHEaGA&t=1263s" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-17", testo: "Watch this: https://www.youtube.com/watch?v=1_gJp2uAjO0" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-14", testo: "Get ready for the oral test" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-13", testo: "L03E02, L03E03" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-03", testo: "Listen and read again and pay attention to your pronunciation pag. 26" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-30", testo: "pag. 24" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-09-22", testo: "Esercizio L02E01" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-09-18", testo: "Completare gli esercizi" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-16", testo: "study also the examples on pag. 23" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-15", testo: "studiare il brano e fare l'esercizio di ascolto B2" }
     ],
     agenda: [
       { id: uid(), titolo: "Verifica lab info - tecn web lez 1", tipo: "Verifica", materia: "INFORMATICA", data: "2026-10-03", oraInizio: "10:50", oraFine: "10:50", desc: "", inserito: "03/10/2026 - 08:00", autore: "URSOMANDO ALESSANDRO" },
@@ -222,12 +239,17 @@ function datiEsempio() {
       { id: uid(), titolo: "Verifica TPSIT", tipo: "Verifica", materia: "T.P.S.I.T.", data: "2026-11-06", oraInizio: "09:40", oraFine: "11:20", desc: "XML e DTD", inserito: "06/11/2026 - 08:00", autore: "SANTORO MARTINA" },
       { id: uid(), titolo: "Giornata \"A scuola di sicurezza\" - Teatro Santa Chiara - Trento", tipo: "Evento", materia: "", data: "2026-11-18", oraInizio: "12:22", oraFine: "12:22", desc: "", inserito: "18/11/2026 - 08:00", autore: "URSOMANDO ALESSANDRO" }
     ],
-    assenze: [],
+    assenze: [
+      { id: uid(), tipo: "assenza", data: "2026-10-21", ora: "", giustificata: false, motivo: "" },
+      { id: uid(), tipo: "ritardo", data: "2026-10-20", ora: "10:08", giustificata: false, motivo: "" },
+      { id: uid(), tipo: "ritardo", data: "2026-10-14", ora: "08:51", giustificata: true, motivo: "Giustificata" },
+      { id: uid(), tipo: "ritardo", data: "2026-09-26", ora: "08:03", giustificata: true, motivo: "Giustificata" }
+    ],
     note: [],
     annotazioni: []
   };
 }
-const DATA_VERSION = 2;   // alzando questo numero, i dati aggiornati si caricano da soli al prossimo avvio
+const DATA_VERSION = 3;   // alzando questo numero, i dati aggiornati si caricano da soli al prossimo avvio
 function carica() {
   let saved = null;
   try { const s = localStorage.getItem(KEY); if (s) saved = JSON.parse(s); } catch (e) { /* nessun salvataggio disponibile */ }
