@@ -61,19 +61,19 @@ const periodoCorrente = () => (oggi().getMonth() >= 8 ? 'T1' : 'P2');
 const nelPeriodo = (s, p) => { const P = periodi()[p]; return s >= P.da && s <= P.a; };
 
 /* ---------- Materie e orario ---------- */
-const MATERIE = ["GEST. PROG. ORG. D'IMPR.", 'INFORMATICA', 'IRC', 'ITALIANO', 'INGLESE', 'MATEMATICA', 'SCIENZE MOTORIE E SPORTIVE', 'SIS. E RETI', 'STORIA', 'T.P.S.I.T.'];
+const MATERIE = ["GEST. PROG. ORG. D'IMPR.", 'INFORMATICA', 'INGLESE', 'ITALIANO', 'MATEMATICA', 'SCIENZE MOTORIE E SPORTIVE', 'SIS. E RETI', 'STORIA', 'T.P.S.I.T.'];
 const DOCENTI = {
-  "GEST. PROG. ORG. D'IMPR.": 'ROSSI LAURA', 'INFORMATICA': 'BIANCHI MARCO / FERRARI LUCA', 'IRC': 'GALLO ANNA', 'ITALIANO': 'CONTI PAOLO',
-  'INGLESE': 'GRECO SARA', 'MATEMATICA': 'MORETTI GIULIA', 'SCIENZE MOTORIE E SPORTIVE': 'RIVA DAVIDE', 'SIS. E RETI': 'FONTANA ELENA / FERRARI LUCA',
-  'STORIA': 'CONTI PAOLO', 'T.P.S.I.T.': 'ROSSI LAURA'
+  "GEST. PROG. ORG. D'IMPR.": 'MATTAREI DANIELA', 'INFORMATICA': 'URSOMANDO ALESSANDRO / ANNINO SANTO DOMENICO', 'ITALIANO': 'PANTANO GIULIANO',
+  'INGLESE': 'GUALANO RUBEN', 'MATEMATICA': 'CROCE ROBERTA', 'SCIENZE MOTORIE E SPORTIVE': 'VICENTINI MAURIZIO', 'SIS. E RETI': 'PATTI ALESSANDRO / ANNINO SANTO DOMENICO',
+  'STORIA': 'PANTANO GIULIANO', 'T.P.S.I.T.': 'SANTORO MARTINA / MATTAREI DANIELA'
 };
-const COLORI = { 'INGLESE': '#e7b9c6', 'INFORMATICA': '#9ed79b', 'MATEMATICA': '#9cc8f0', 'ITALIANO': '#f2c98a', 'STORIA': '#d5b8ec', 'SIS. E RETI': '#8fd6d0', 'T.P.S.I.T.': '#f3a59a', "GEST. PROG. ORG. D'IMPR.": '#c7c58c', 'SCIENZE MOTORIE E SPORTIVE': '#b5d97a', 'IRC': '#c9c9c9' };
+const COLORI = { 'INGLESE': '#e7b9c6', 'INFORMATICA': '#9ed79b', 'MATEMATICA': '#9cc8f0', 'ITALIANO': '#f2c98a', 'STORIA': '#d5b8ec', 'SIS. E RETI': '#8fd6d0', 'T.P.S.I.T.': '#f3a59a', "GEST. PROG. ORG. D'IMPR.": '#c7c58c', 'SCIENZE MOTORIE E SPORTIVE': '#b5d97a' };
 const ORE = [['08:00', '08:50'], ['08:50', '09:40'], ['09:40', '10:30'], ['10:30', '11:20'], ['11:20', '12:10'], ['12:10', '13:00']];
 const ORARIO = { // 1 = lunedì ... 6 = sabato
   1: ["GEST. PROG. ORG. D'IMPR.", "GEST. PROG. ORG. D'IMPR.", 'SIS. E RETI', 'SIS. E RETI', 'MATEMATICA', 'T.P.S.I.T.'],
   2: ['ITALIANO', 'ITALIANO', 'STORIA', 'INFORMATICA', 'INFORMATICA', 'INFORMATICA'],
   3: ['ITALIANO', 'INGLESE', 'MATEMATICA', 'SIS. E RETI', 'T.P.S.I.T.', 'INGLESE'],
-  4: ["GEST. PROG. ORG. D'IMPR.", 'IRC', 'STORIA', 'SIS. E RETI', 'SIS. E RETI', 'SIS. E RETI'],
+  4: ["GEST. PROG. ORG. D'IMPR.", 'STORIA', 'STORIA', 'SIS. E RETI', 'SIS. E RETI', 'SIS. E RETI'],
   5: ['SCIENZE MOTORIE E SPORTIVE', 'SCIENZE MOTORIE E SPORTIVE', 'T.P.S.I.T.', 'T.P.S.I.T.', 'ITALIANO', 'INFORMATICA'],
   6: ['INGLESE', 'MATEMATICA', 'MATEMATICA', 'INFORMATICA', 'INFORMATICA']
 };
@@ -88,54 +88,141 @@ function giornoScuola(n) { // data relativa a oggi che non cade di domenica
   return iso(d);
 }
 function datiEsempio() {
-  const D = giornoScuola, ora = new Date();
-  const ins = n => `${fmtNum(D(n))} - ${pad(ora.getHours())}:${pad(ora.getMinutes())}`;
   return {
     studente: { nome: 'MOUAD', cognome: 'BIAZ', classe: '5AIN', anno: `${annoInizio()}/${annoInizio() + 1}` },
-    account: { utente: 'Mouad.Biaz', password: '10082008', istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' },
-    voti: [
-      { id: uid(), materia: 'INFORMATICA', voto: 9, data: D(-16), tipo: 'Scritto', desc: 'Verifica su basi di dati' },
-      { id: uid(), materia: 'INFORMATICA', voto: 10, data: D(-10), tipo: 'Pratico', desc: 'Query SQL in laboratorio' },
-      { id: uid(), materia: 'SCIENZE MOTORIE E SPORTIVE', voto: 8.25, data: D(-3), tipo: 'Pratico', desc: 'Test di resistenza' },
-      { id: uid(), materia: 'MATEMATICA', voto: 7.5, data: D(-8), tipo: 'Scritto', desc: 'Derivate' },
-      { id: uid(), materia: 'INGLESE', voto: 8, data: D(-6), tipo: 'Orale', desc: 'Presentation about AI' },
-      { id: uid(), materia: 'ITALIANO', voto: 7, data: D(-12), tipo: 'Scritto', desc: 'Analisi del testo' },
-      { id: uid(), materia: 'SIS. E RETI', voto: 5.5, data: D(-4), tipo: 'Scritto', desc: 'Indirizzamento IP e subnetting' }
-    ],
+    account: { utente: '107447', password: 'fda3db968e7ae', istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' },
+    voti: [],
     argomenti: [
-      { id: uid(), materia: 'INGLESE', data: D(-2), testo: 'Video on quantum computers' },
-      { id: uid(), materia: 'MATEMATICA', data: D(-2), testo: 'Esercizi derivate composte' },
-      { id: uid(), materia: 'MATEMATICA', data: D(-2), testo: 'Problemi di ottimizzazione' },
-      { id: uid(), materia: 'INFORMATICA', data: D(-2), testo: 'Verifica primo modulo teoria: sistemi informativi e basi di dati' },
-      { id: uid(), materia: 'ITALIANO', data: D(-3), testo: 'Giovanni Verga: vita e opere' },
-      { id: uid(), materia: 'T.P.S.I.T.', data: D(-3), testo: 'Architettura client-server e socket' },
-      { id: uid(), materia: 'SIS. E RETI', data: D(-4), testo: 'Subnetting: esercizi guidati' },
-      { id: uid(), materia: 'STORIA', data: D(-4), testo: 'La seconda rivoluzione industriale' },
-      { id: uid(), materia: 'INFORMATICA', data: D(-5), testo: 'Modello E/R: entità e associazioni' },
-      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: D(-6), testo: 'Il ciclo di vita di un progetto' },
-      { id: uid(), materia: 'INGLESE', data: D(-6), testo: 'Reading: the history of the Internet' }
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-10", testo: "Laboratorio - ip calculator" },
+      { id: uid(), materia: "STORIA", data: "2026-09-10", testo: "Presentazione programma" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-09-10", testo: "Saluti alla classe - presentazione materia" },
+      { id: uid(), materia: "ITALIANO", data: "2026-09-11", testo: "A. Manzoni" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-11", testo: "Ripasso programma 4" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-12", testo: "visione globale del programma" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-12", testo: "Living in a smart world - the AI revolution pag. 20-21" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-14", testo: "Sistemi distribuiti: generalità" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-14", testo: "Saluti alla classe e presentazione del programma" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-14", testo: "Laboratorio - IP Calculator" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-14", testo: "Ripasso - ripasso indirizzamento IP" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-09-14", testo: "Introduzione organizzazione aziendale - Introduzione ai concetti base: azienda, impresa, settori, bilancio, costi, ricavi, profitto" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-09-15", testo: "Introduzione a HTML e CSS. Definizione di HTML, attributo, elemento, tag, marcatore, proprietà CSS, dichiarazione, struttura di una pagina HTML, struttura di un progetto, strumenti per sviluppare pagine web, file di reset, attributo globale style. Esercizi." },
+      { id: uid(), materia: "INGLESE", data: "2026-09-15", testo: "The Internet of things IOT" },
+      { id: uid(), materia: "ITALIANO", data: "2026-09-15", testo: "Manzoni Promessi sposi" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-16", testo: "Derivate funzioni : ripasso" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-16", testo: "Test di ripasso - indirizzamento IP" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-16", testo: "smart solution for smart cities" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-17", testo: "Laboratorio - Continuazione progetto IP Calculator" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-17", testo: "Ripasso - Test su Routing" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-17", testo: "Correzione Test su indirizzi IP -" },
+      { id: uid(), materia: "STORIA", data: "2026-09-17", testo: "Accordi di Plombieres" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-09-17", testo: "aziende e mercati - microeconomia e macroeconomia, cenni sull'analisi della formazione del prezzo" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-09-18", testo: "Elemento style. Concetto di regola CSS. Concetto di selettore. Presentazione del manualetto CSS. L'elemento a." },
+      { id: uid(), materia: "ITALIANO", data: "2026-09-18", testo: "Manzoni Promessi sposi" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-18", testo: "sistemi distribuiti - Classificazione di Flynn: definizione e applicazioni reali" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-09-19", testo: "Calcio" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-19", testo: "Revisione derivate: esercizi" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-19", testo: "Revisione derivate" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-19", testo: "lavoro di gruppo: ask your mate about IOT" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-21", testo: "Approfondimento individuale classificazione di Flynn" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-21", testo: "Derivate di funzioni : ripasso" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-21", testo: "Protocolli a livello Applicativo - Introduzione a DNS" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-09-21", testo: "Costi aziendali - Gestione dei costi" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-24", testo: "I Protocolli a livello Applicazione - Gerarchia dei Server DNS, query ricorsiva e iterativa" },
+      { id: uid(), materia: "STORIA", data: "2026-09-24", testo: "Spedizione dei Mille" },
+      { id: uid(), materia: "ITALIANO", data: "2026-09-25", testo: "Manzoni. Conclusione" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-25", testo: "XML introduzione" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-26", testo: "Test ingresso università: esempi" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-26", testo: "Test ingresso università: esempi" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-26", testo: "generation Alpha" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-28", testo: "Cluster computing" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-28", testo: "Derivate composte: potenza di funzione. Esempi funzioni razionali e irrazionali." },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-28", testo: "I Protocolli a livello Applicazione - tipologia di record DNS e ripasso query iterative e ricorsive" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-09-28", testo: "Prezzi e Costi - Costi indiretti e cost diretti Tipologie di concorrenza" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-09-29", testo: "Correzione esercizio. Visione di una prova d'esame. Visione di un filmato sul labelling per addestramento IA" },
+      { id: uid(), materia: "ITALIANO", data: "2026-09-29", testo: "Manzoni. Conclusione" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-30", testo: "Reading: pag. 26 Smartphones; use of abuse" },
+      { id: uid(), materia: "INGLESE", data: "2026-09-30", testo: "generation Alpha and the Attention Economy" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-09-30", testo: "Grid Computing" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-09-30", testo: "I Protocolli a Livello Applicazione - DNS tipi di record, struttura query" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-09-30", testo: "Derivate funzioni composte: potenze, esponenziale. Esempi" },
+      { id: uid(), materia: "ITALIANO", data: "2026-09-30", testo: "Leopardi, Vita e opere." },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-10-01", testo: "Organizzazione - introduzione all'organizzazione aziendale" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-02", testo: "Sistema informativo e sistema informatico: introduzione." },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-02", testo: "Proclamazione del Regno d'Italia" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-02", testo: "Esercitazione XML" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-03", testo: "Prova di verifica su tecn web modulo 1 Introduzione a ERP, EDP e database." },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-03", testo: "Derivate funzione composta logaritmo" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-03", testo: "Derivate funzioni composte, esempi con funzioni e potenze" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-03", testo: "i plurali irregolari in inglese - i nomi collettivi police, family, money. people" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-05", testo: "Derivate funzioni composte" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-10-05", testo: "La Crittografia - Introduzione alla crittografia" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-10-05", testo: "Gestione aziendale - Test auto-valutativo di ripasso" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-06", testo: "Tabelle, colori, classi, id e pseudoclassi. Esercizi" },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-06", testo: "Verifica di Storia" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-07", testo: "Orientamento in uscita Kairos" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-07", testo: "Orientamento in Uscita al Kairos" },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-07", testo: "Dalla Beat generation al '68" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-10-08", testo: "organizzazione aziendale - Micro organizzazione" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-09", testo: "Verifica tecn web lez 2" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-09", testo: "XML - Esercitazione 2 su Classroom" },
+      { id: uid(), materia: "SCIENZE MOTORIE E SPORTIVE", data: "2026-10-09", testo: "esercizi a corpo libero -" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-10", testo: "Completato modulo sui sistemi informativi aziendali" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-10", testo: "Esercizi derivate funzioni composte" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-10", testo: "Derivate e funzioni composte." },
+      { id: uid(), materia: "INGLESE", data: "2026-10-10", testo: "Unit 2 : From workstation to supercomputers" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-12", testo: "sistemi distribuiti - cloud computing" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-10-12", testo: "Laboratorio - Intelligenza Artificiale per la Robotica Umanoide" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-10-12", testo: "intro macrogranizzazione" },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-10-12", testo: "interrogazione" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-13", testo: "Orientamento in uscita - Incontro al Kairos" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-13", testo: "Orientamento in uscita - Incontro al Kairos" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-13", testo: "Orientamento in uscita - Incontro al Kairos" },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-13", testo: "Leopardi. Operette morali" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-14", testo: "Quantum computers" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-14", testo: "interrogazione" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-14", testo: "preparazione intervento Kairos" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-10-14", testo: "Ripasso -" },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-14", testo: "Leopardi, Canto notturno...." },
+      { id: uid(), materia: "GEST. PROG. ORG. D'IMPR.", data: "2026-10-15", testo: "organizzazione aziendale - Organigramma - ricerca esempi estrapolazione caratteristiche tipologie" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-16", testo: "Box model, i punti cardinali" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-16", testo: "XML - DTD" },
+      { id: uid(), materia: "SCIENZE MOTORIE E SPORTIVE", data: "2026-10-16", testo: "coordinazione-forza- -" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-17", testo: "Verifica primo modulo teoria: sistemi informativi e db Modulo 2: analisi" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-17", testo: "Problemi di ottimizzazione" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-17", testo: "Esercizi derivate composte" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-17", testo: "Video on quantum Computers The Race to Harness Quantum Computing's Mind-Bending Power | The Future With Hannah Fry - https://www.youtube.com/watch?v=1_gJp2uAjO0" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-19", testo: "Discussione" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-20", testo: "Visione film: The zero theorem. Visione del cortometraggio: The prompt." },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-20", testo: "Leopardi. Dialogo della natura e di un islandese" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-21", testo: "proseguo film" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-21", testo: "visione film in lingua" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-10-21", testo: "La Crittografia - cifrario a trasposizione colonnare" },
+      { id: uid(), materia: "ITALIANO", data: "2026-10-21", testo: "Leopardi, Quiete dopo la tempesta, Sabato del villaggio" },
+      { id: uid(), materia: "SIS. E RETI", data: "2026-10-22", testo: "Orientamento in uscita -" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-23", testo: "Introduzione allo schema concettuale ER" },
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-23", testo: "XML - Esercitazioni su Classroom (da consegnare)" },
+      { id: uid(), materia: "INFORMATICA", data: "2026-10-24", testo: "Concetto di associazione in un diagramma ER. Partecipazioni. Esempi" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-24", testo: "Verifica scritta" },
+      { id: uid(), materia: "MATEMATICA", data: "2026-10-24", testo: "Verifica scritta" },
+      { id: uid(), materia: "INGLESE", data: "2026-10-24", testo: "interrogazione" }
     ],
     compiti: [
-      { id: uid(), materia: 'INGLESE', data: D(-2), testo: 'Watch this video and take notes' },
-      { id: uid(), materia: 'INFORMATICA', data: D(-2), testo: 'Prepararsi alla verifica sui contenuti di questa lezione' },
-      { id: uid(), materia: 'INFORMATICA', data: D(-2), testo: 'Esercizio della biblioteca (schema E/R)' },
-      { id: uid(), materia: 'INGLESE', data: D(2), testo: 'Get ready for the oral test' },
-      { id: uid(), materia: 'MATEMATICA', data: D(3), testo: 'Esercizi pag. 214 n. 15-22' },
-      { id: uid(), materia: 'ITALIANO', data: D(4), testo: 'Leggere la novella "Rosso Malpelo"' },
-      { id: uid(), materia: 'SIS. E RETI', data: D(5), testo: 'Completare la scheda sul subnetting' },
-      { id: uid(), materia: 'T.P.S.I.T.', data: D(6), testo: 'Consegnare il progetto della chat client-server' }
+      { id: uid(), materia: "T.P.S.I.T.", data: "2026-10-23", testo: "XML - Esercitazioni su Classroom (da consegnare)" }
     ],
     agenda: [
-      { id: uid(), titolo: 'Orientamento post diploma', tipo: 'Evento', materia: '', data: D(3), oraInizio: '08:00', oraFine: '09:30', desc: 'Incontro con le università in aula magna.', inserito: ins(-20), autore: 'Segreteria didattica' },
-      { id: uid(), titolo: 'Verifica di Informatica', tipo: 'Verifica', materia: 'INFORMATICA', data: D(-2), oraInizio: '10:30', oraFine: '12:10', desc: 'Primo modulo: sistemi informativi.', inserito: ins(-9), autore: docente('INFORMATICA') },
-      { id: uid(), titolo: 'Verifica di Matematica', tipo: 'Verifica', materia: 'MATEMATICA', data: D(5), oraInizio: '09:40', oraFine: '10:30', desc: 'Derivate e studio di funzione.', inserito: ins(-4), autore: docente('MATEMATICA') },
-      { id: uid(), titolo: 'Consegna progetto T.P.S.I.T.', tipo: 'Progetto', materia: 'T.P.S.I.T.', data: D(6), oraInizio: '09:40', oraFine: '11:20', desc: 'Chat client-server in Java.', inserito: ins(-6), autore: docente('T.P.S.I.T.') },
-      { id: uid(), titolo: 'Interrogazioni di Storia', tipo: 'Verifica', materia: 'STORIA', data: D(-11), oraInizio: '09:40', oraFine: '10:30', desc: '', inserito: ins(-15), autore: docente('STORIA') }
+      { id: uid(), titolo: "Verifica lab info - tecn web lez 1", tipo: "Verifica", materia: "INFORMATICA", data: "2026-10-03", oraInizio: "10:50", oraFine: "10:50", desc: "", inserito: "03/10/2026 - 08:00", autore: "URSOMANDO ALESSANDRO" },
+      { id: uid(), titolo: "Orientamento post diploma", tipo: "Evento", materia: "", data: "2026-10-07", oraInizio: "09:00", oraFine: "13:00", desc: "presso Auditorium Kairos", inserito: "07/10/2026 - 08:00", autore: "Didattica Sei" },
+      { id: uid(), titolo: "Verifica lab info - tecn web lez 2", tipo: "Verifica", materia: "INFORMATICA", data: "2026-10-09", oraInizio: "10:50", oraFine: "10:50", desc: "", inserito: "09/10/2026 - 08:00", autore: "URSOMANDO ALESSANDRO" },
+      { id: uid(), titolo: "Orientamento post diploma", tipo: "Evento", materia: "", data: "2026-10-13", oraInizio: "08:50", oraFine: "13:00", desc: "presso Auditorium Don Milani di Pergine", inserito: "13/10/2026 - 08:00", autore: "Didattica Sei" },
+      { id: uid(), titolo: "Corsa campestre - fase d'Istituto", tipo: "Evento", materia: "", data: "2026-10-14", oraInizio: "09:40", oraFine: "13:00", desc: "", inserito: "14/10/2026 - 08:00", autore: "Didattica Sette" },
+      { id: uid(), titolo: "Verifica di informatica (Sistemi Informativi Aziendali)", tipo: "Verifica", materia: "INFORMATICA", data: "2026-10-17", oraInizio: "10:30", oraFine: "11:30", desc: "", inserito: "17/10/2026 - 08:00", autore: "URSOMANDO ALESSANDRO" },
+      { id: uid(), titolo: "Orientamento post diploma - 22 ottobre 2026", tipo: "Evento", materia: "", data: "2026-10-22", oraInizio: "08:50", oraFine: "13:00", desc: "Pergine, Auditorium I.C. Pergine 1", inserito: "22/10/2026 - 08:00", autore: "Didattica Due" },
+      { id: uid(), titolo: "Verifica di matematica", tipo: "Verifica", materia: "MATEMATICA", data: "2026-10-24", oraInizio: "08:50", oraFine: "10:25", desc: "Derivate funzioni composte e problemi di ottimizzazione", inserito: "24/10/2026 - 08:00", autore: "CROCE ROBERTA" },
+      { id: uid(), titolo: "Verifica scritta (recupero assenti del 24)", tipo: "Verifica", materia: "MATEMATICA", data: "2026-10-26", oraInizio: "11:20", oraFine: "12:10", desc: "", inserito: "26/10/2026 - 08:00", autore: "CROCE ROBERTA" },
+      { id: uid(), titolo: "Verifica TPSIT", tipo: "Verifica", materia: "T.P.S.I.T.", data: "2026-11-06", oraInizio: "09:40", oraFine: "11:20", desc: "XML e DTD", inserito: "06/11/2026 - 08:00", autore: "SANTORO MARTINA" },
+      { id: uid(), titolo: "Giornata \"A scuola di sicurezza\" - Teatro Santa Chiara - Trento", tipo: "Evento", materia: "", data: "2026-11-18", oraInizio: "12:22", oraFine: "12:22", desc: "", inserito: "18/11/2026 - 08:00", autore: "URSOMANDO ALESSANDRO" }
     ],
-    assenze: [
-      { id: uid(), tipo: 'ritardo', data: D(-23), ora: '08:03', giustificata: true, motivo: 'Mezzi di trasporto' },
-      { id: uid(), tipo: 'ritardo', data: D(-5), ora: '08:51', giustificata: false, motivo: '' }
-    ],
+    assenze: [],
     note: [],
     annotazioni: []
   };
@@ -517,8 +604,8 @@ PAGES.docente = () => {
       <button class="btn-yellow" type="submit">Salva dati</button>
     </form>
     <div class="form"><h3>Dati del registro</h3>
-      <p class="hint">I dati sono salvati solo su questo telefono. Puoi ricaricare gli esempi per la presentazione oppure svuotare il registro e partire da zero.</p>
-      <div class="row-btns"><button class="btn-line" data-act="reset">Ricarica dati di esempio</button><button class="btn-line danger" data-act="svuota">Svuota registro</button></div>
+      <p class="hint">I dati sono salvati su questo telefono. Puoi ricaricare i tuoi dati (argomenti e agenda) oppure svuotare il registro e partire da zero.</p>
+      <div class="row-btns"><button class="btn-line" data-act="reset">Carica i miei dati</button><button class="btn-line danger" data-act="svuota">Svuota registro</button></div>
     </div>`;
   } else {
     const f = FORMS[S.docTab];
@@ -786,7 +873,7 @@ document.addEventListener('click', e => {
       });
       break;
     case 'reset':
-      avviso('Ricarica esempi', 'I dati attuali verranno sostituiti con quelli di esempio. Continuare?', () => { DB = datiEsempio(); salva(); toast('Dati di esempio caricati'); render(true); });
+      avviso('Carica i miei dati', 'I dati attuali verranno sostituiti con gli argomenti e l\'agenda caricati. Continuare?', () => { DB = datiEsempio(); salva(); toast('I tuoi dati sono stati caricati'); render(true); });
       break;
     case 'svuota':
       avviso('Svuota registro', 'Verranno cancellati voti, compiti, argomenti, agenda e assenze. Continuare?', () => {
