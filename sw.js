@@ -1,5 +1,5 @@
 // Service worker: salva i file dell'app così funziona anche senza internet
-const CACHE = 'registro-v5';
+const CACHE = 'registro-v7';
 const FILES = ['./', './index.html', './style.css', './app.js', './firebase-config.js', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -22,4 +22,12 @@ self.addEventListener('fetch', e => {
       return res;
     }).catch(() => caches.match('./index.html')))
   );
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(clients.matchAll({ type: 'window' }).then(list => {
+    for (const c of list) { if ('focus' in c) return c.focus(); }
+    if (clients.openWindow) return clients.openWindow('./');
+  }));
 });

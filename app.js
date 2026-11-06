@@ -249,19 +249,13 @@ function datiEsempio() {
     annotazioni: []
   };
 }
-const DATA_VERSION = 3;   // alzando questo numero, i dati aggiornati si caricano da soli al prossimo avvio
 function carica() {
   let saved = null;
   try { const s = localStorage.getItem(KEY); if (s) saved = JSON.parse(s); } catch (e) { /* nessun salvataggio disponibile */ }
-  const ver = Number(leggi('registro_datav') || 0);
-  if (!saved || ver < DATA_VERSION) {        // primo avvio, oppure nuovi dati da caricare: li metto da solo
-    DB = datiEsempio();
-    scrivi('registro_datav', String(DATA_VERSION));
-    salva();
-    return;
-  }
-  DB = saved;
+  if (saved) DB = saved;            // i dati gia' presenti NON vengono mai sovrascritti dagli aggiornamenti
+  else DB = datiEsempio();          // solo al primo avvio carico i dati iniziali
   if (!DB.account) DB.account = { utente: '107447', password: 'fda3db968e7ae', istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' };
+  if (!DB.seen) DB.seen = {};       // ricorda quando ho aperto l'ultima volta ogni sezione
   salva();
 }
 const SESS = 'registro_sessione_v1', SESS_U = 'registro_utente_v1';
@@ -282,11 +276,14 @@ function initCloud() {
       const val = snap.val();
       if (!val) { pushCloud(); return; }        // database vuoto: carico i dati di questo dispositivo
       const js = JSON.stringify(val);
-      if (js === lastSync) return;               // è una modifica fatta da noi
-      lastSync = js;
-      DB = val;
+      if (js === lastSync) return;               // è la modifica che abbiamo appena mandato noi
+      const merged = unione(DB, val);            // UNISCO locale + online: nessun telefono perde i suoi dati
+      const mjs = JSON.stringify(merged);
+      DB = merged;
       if (!DB.account) DB.account = { utente: DEF_USER, password: DEF_PASS, istituto: 'Istituto di Istruzione Superiore "Marie Curie (TN)"' };
-      try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {}
+      try { localStorage.setItem(KEY, mjs); } catch (e) {}
+      if (mjs !== js) { lastSync = mjs; try { cloud.set(DB); } catch (e) {} }   // rimando online la versione unita
+      else lastSync = js;
       const a = document.activeElement, dentroForm = a && /INPUT|TEXTAREA|SELECT/.test(a.tagName);
       if (S.logged && !document.getElementById('mback') && !dentroForm) render(true);   // aggiorna le schermate all'istante
     }, () => { cloudOn = false; });
@@ -295,6 +292,39 @@ function initCloud() {
 function pushCloud() {
   if (!cloudOn || !cloud) return;
   try { lastSync = JSON.stringify(DB); cloud.set(DB); } catch (e) { /* riprova al prossimo salvataggio */ }
+}
+// Unione dei dati di due dispositivi (per non perdere nulla quando si sincronizzano)
+const COLLES = ['voti', 'argomenti', 'compiti', 'agenda', 'assenze', 'note', 'annotazioni'];
+function sigDato(sec, x) {
+  switch (sec) {
+    case 'voti': return `${x.materia}|${x.data}|${x.voto}|${x.tipo}|${x.desc || ''}`;
+    case 'argomenti': case 'compiti': return `${x.materia}|${x.data}|${x.testo}`;
+    case 'agenda': return `${x.data}|${x.oraInizio}|${x.titolo}`;
+    case 'assenze': return `${x.tipo}|${x.data}|${x.ora || ''}`;
+    case 'note': return `${x.data}|${x.docente || ''}|${x.testo}`;
+    case 'annotazioni': return `${x.data}|${x.materia || ''}|${x.testo}`;
+    default: return JSON.stringify(x);
+  }
+}
+function unione(locale, remoto) {
+  locale = locale || {}; remoto = remoto || {};
+  const out = {};
+  COLLES.forEach(sec => {
+    const map = new Map();
+    (locale[sec] || []).forEach(x => map.set(sigDato(sec, x), x));
+    (remoto[sec] || []).forEach(x => {
+      const k = sigDato(sec, x), cur = map.get(k);
+      if (!cur) map.set(k, x);
+      else if (sec === 'assenze' && x.giustificata && !cur.giustificata) map.set(k, x);   // tieni la versione giustificata
+    });
+    out[sec] = [...map.values()];
+  });
+  out.studente = locale.studente || remoto.studente;
+  out.account = locale.account || remoto.account;
+  out.seen = {};
+  new Set([...Object.keys(locale.seen || {}), ...Object.keys(remoto.seen || {})]).forEach(s =>
+    out.seen[s] = Math.max((locale.seen || {})[s] || 0, (remoto.seen || {})[s] || 0));
+  return out;
 }
 
 /* ---------- Icone (SVG) ---------- */
@@ -338,7 +368,36 @@ const S = {
 
 /* ---------- Componenti riutilizzabili ---------- */
 const prossimiCompiti = () => DB.compiti.filter(c => c.data >= iso(oggi())).sort((a, b) => a.data.localeCompare(b.data));
-const badge = () => { const n = prossimiCompiti().length; return n ? `<span class="badge">${n}</span>` : ''; };
+const SEZIONI = ['agenda', 'annotazioni', 'argomenti', 'assenze', 'compiti', 'note', 'voti'];
+const nonVisti = sec => (DB[sec] || []).filter(x => (x.createdAt || 0) > ((DB.seen && DB.seen[sec]) || 0)).length;
+const totNonVisti = () => SEZIONI.reduce((n, s) => n + nonVisti(s), 0);
+const pill = n => n ? `<span class="badge">${n}</span>` : '';
+const badge = () => pill(totNonVisti());
+function aggiornaAppBadge() {            // il pallino rosso sull'icona, anche fuori dall'app
+  try { const t = totNonVisti(); if (navigator.setAppBadge) { t ? navigator.setAppBadge(t) : (navigator.clearAppBadge && navigator.clearAppBadge()); } } catch (e) {}
+}
+function mostraNotifica(titolo, corpo) {
+  try {
+    if (!('Notification' in window)) return;
+    const invia = () => {
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.ready)
+          navigator.serviceWorker.ready.then(r => r.showNotification(titolo, { body: corpo, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png' })).catch(() => { new Notification(titolo, { body: corpo, icon: 'icons/icon-192.png' }); });
+        else new Notification(titolo, { body: corpo, icon: 'icons/icon-192.png' });
+      } catch (e) {}
+    };
+    if (Notification.permission === 'granted') invia();
+    else if (Notification.permission !== 'denied') Notification.requestPermission().then(x => { if (x === 'granted') invia(); });
+  } catch (e) {}
+}
+function notificaInserimento(tipo, rec) {
+  let t;
+  if (tipo === 'voto') t = `È stato inserito un nuovo voto in ${rec.materia}: ${fmtVoto(rec.voto)}`;
+  else if (tipo === 'agenda') t = `Nuovo in agenda — ${rec.tipo}: ${rec.titolo}`;
+  else if (tipo === 'assenza') t = `Registrata: ${testoAssenza(rec, true)}`;
+  else { const e = { argomento: 'argomento', compito: 'compito', nota: 'nota', annotazione: "un'annotazione" }[tipo] || 'elemento'; t = `È stato inserito un nuovo ${e}${rec.materia ? ' in ' + rec.materia : ''}: ${rec.testo || ''}`; }
+  mostraNotifica('Registro', t);
+}
 
 function header(titolo) {
   return `<header class="topbar">
@@ -445,7 +504,7 @@ PAGES.home = () => {
       <div class="daybody">
         <h4>ATTIVITA' DI OGGI</h4>
         ${fest && fest !== 'Domenica' ? `<p class="empty-line"><b>${esc(fest)}</b></p>` : ''}
-        ${eventi.length || arg.length || votiG.length ? `<div class="items flush">${eventi.map(e => riga({ c: 'agenda', id: e.id, t1: e.titolo, nocase: true, t2: `Ore: ${e.oraInizio} - ${e.oraFine}` })).join('')}${votiG.map(v => riga({ c: 'voti', id: v.id, t1: v.materia, t2: `Voto ${fmtVoto(v.voto)} (${v.tipo.toLowerCase()})`, bar: v.voto < 6 ? 'var(--red)' : 'var(--green-dark)' })).join('')}${arg.map(a => riga({ c: 'argomenti', id: a.id, t1: a.materia, t2: a.testo })).join('')}</div>`
+        ${eventi.length ? `<div class="items flush">${eventi.map(e => riga({ c: 'agenda', id: e.id, t1: e.titolo, nocase: true, t2: `Ore: ${e.oraInizio} - ${e.oraFine}` })).join('')}</div>`
       : `<p class="empty-line">Nessuna attività prevista per oggi!</p>`}
         <h4 class="sub">Prossimi compiti</h4>
         ${comp.length ? `<div class="items flush">${comp.map(c => riga({ c: 'compiti', id: c.id, t1: c.materia, t2: c.testo, t3: fmtFull(c.data) })).join('')}</div>` : `<p class="empty-line">Nessun compito in programma</p>`}
@@ -695,8 +754,10 @@ function salvaForm(form) {
       if (v.tipo === 'assenza') rec.ora = '';
       break;
   }
+  rec.createdAt = Date.now();
   DB[FORMS[tipo].col].push(rec);
   salva(); S.docErr = '';
+  notificaInserimento(tipo, rec);
   toast(`${FORMS[tipo].tab} salvato`);
   render(true);
 }
@@ -757,12 +818,11 @@ function toast(msg) {
 function drawer() {
   const st = DB.studente;
   const voce = (p, ic, lb, extra = '', gold = false) => `<button class="dlink" data-act="go" data-p="${p}"><span class="ic ${gold ? 'gold' : ''}">${I[ic]}</span><span class="lb">${lb}${extra}</span></button>`;
-  const n = prossimiCompiti().length;
   return `<div class="who"><span class="avatar">${esc(st.nome.charAt(0))}</span><span>${esc(st.cognome)} ${esc(st.nome)}</span>${I.check}</div>
     <h2 class="dsec">Didattica</h2>
-    ${voce('agenda', 'agenda', 'Agenda')}${voce('annotazioni', 'annot', 'Annotazioni')}${voce('argomenti', 'argom', 'Argomenti')}${voce('assenze', 'assenze', 'Assenze')}
-    ${voce('compiti', 'compiti', 'Compiti', n ? `<span class="badge">${n}</span>` : '')}${voce('note', 'note', 'Note')}${voce('orario', 'orario', 'Orario scolastico')}
-    ${voce('pagDoc', 'pagella', 'Pagelle (documenti)')}${voce('pagRiep', 'pagella', 'Pagelle (riepilogo)')}${voce('voti', 'voti', 'Voti')}
+    ${voce('agenda', 'agenda', 'Agenda', pill(nonVisti('agenda')))}${voce('annotazioni', 'annot', 'Annotazioni', pill(nonVisti('annotazioni')))}${voce('argomenti', 'argom', 'Argomenti', pill(nonVisti('argomenti')))}${voce('assenze', 'assenze', 'Assenze', pill(nonVisti('assenze')))}
+    ${voce('compiti', 'compiti', 'Compiti', pill(nonVisti('compiti')))}${voce('note', 'note', 'Note', pill(nonVisti('note')))}${voce('orario', 'orario', 'Orario scolastico')}
+    ${voce('pagDoc', 'pagella', 'Pagelle (documenti)')}${voce('pagRiep', 'pagella', 'Pagelle (riepilogo)')}${voce('voti', 'voti', 'Voti', pill(nonVisti('voti')))}
     <h2 class="dsec">Amministrazione</h2>
     <button class="dlink" data-act="go" data-p="docente"><span class="ic" style="background:#4f9d5f">${I.documenti}</span><span class="lb">Documenti</span></button>
     <button class="dlink" data-act="logout"><span class="ic" style="background:#c0392b">${I.logout}</span><span class="lb">Esci</span></button>`;
@@ -847,9 +907,11 @@ function render(mantieniScroll) {
   const y = window.scrollY;
   document.getElementById('app').innerHTML = PAGES[S.page]();
   if (mantieniScroll) window.scrollTo(0, y);
+  aggiornaAppBadge();
 }
 function vai(p) {
   if (p !== 'docente') S.docErr = '';
+  if (SEZIONI.includes(p)) { if (!DB.seen) DB.seen = {}; DB.seen[p] = Date.now(); salva(); }   // apri -> pallino via
   S.page = p; chiudiMenu(); render(); window.scrollTo(0, 0);
   if (p === 'compiti') { // porta in vista i compiti di oggi o i prossimi
     const primo = prossimiCompiti()[0];
